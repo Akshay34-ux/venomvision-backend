@@ -3,15 +3,17 @@ import pkg from "pg";
 const { Pool } = pkg;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // from .env
-  ssl: {
-    rejectUnauthorized: false, // Supabase requires this
-  },
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+  host: "db.qjmshsilfvnjfoggcvca.supabase.co", // ✅ force IPv4 host
+  port: 5432,
+  user: "postgres",
+  password: "a+qVRmAztj6&V69", // ✅ your actual password
+  database: "postgres"
 });
 
-// quick connection test
 pool.connect()
-  .then(() => console.log("✅ Database connected successfully"))
-  .catch(err => console.error("❌ DB Connection Error:", err.message));
+  .then(() => console.log("✅ Connected to Supabase DB"))
+  .catch(err => console.error("❌ DB Connection Failed:", err.message));
 
 export default pool;
