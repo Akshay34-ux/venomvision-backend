@@ -9,6 +9,7 @@ import cors from "cors";
 import uploadRoute from "./routes/identify.js";
 import reportBiteRoute from "./routes/reportBite.js";
 import adminRoute from "./routes/admin.js"; // ✅ Admin route
+import handlerRoutes from "./routes/handlers.js";
 
 // Resolve __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +38,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api/identify", uploadRoute);
 app.use("/api/report-bite", reportBiteRoute);
 app.use("/api/admin", adminRoute); // ✅ Admin login route
-
+app.use("/api/handlers", handlerRoutes);  // ✅ Handlers management routes
 // Default route
 app.get("/", (req, res) => {
   res.send("🚀 VenomVision Backend is running...");
