@@ -1,5 +1,18 @@
-export async function sendApprovalEmail(email, handlerId) {
-  const resetLink = `${process.env.FRONTEND_URL}/set-password/${handlerId}`;
+// backend/src/utils/emailer.js
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: process.env.SMTP_SECURE === "true",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+export async function sendApprovalEmail(email, resetToken) {
+  const resetLink = `${process.env.FRONTEND_URL}/set-password/${resetToken}`;
 
   const mailOptions = {
     from: process.env.EMAIL_FROM,
@@ -14,8 +27,10 @@ export async function sendApprovalEmail(email, handlerId) {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("📧 Email sent:", info.response);
+    console.log("📧 Email send result:", info);
+    return info;
   } catch (err) {
-    console.error("📧 Email error:", err);
+    console.error("❌ Email send error:", err);
+    throw err;
   }
 }
