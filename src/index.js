@@ -10,6 +10,7 @@ import uploadRoute from "./routes/identify.js";
 import reportBiteRoute from "./routes/reportBite.js";
 import adminRoute from "./routes/admin.js"; // ✅ Admin route
 import handlerRoute from "./routes/handlers.js"; // ✅ Handlers route
+import adminHandlersRoute from "./routes/adminHandlers.js";
 
 // Resolve __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +40,7 @@ app.use("/api/identify", uploadRoute);
 app.use("/api/report-bite", reportBiteRoute);
 app.use("/api/admin", adminRoute); // ✅ Admin login route
 app.use("/api/handlers", handlerRoute);  // ✅ Handlers management routes
+app.use("/api/admin", adminHandlersRoute);
 // Default route
 app.get("/", (req, res) => {
   res.send("🚀 VenomVision Backend is running...");
