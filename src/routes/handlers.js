@@ -5,10 +5,12 @@ import pool from "../db.js"; // your pg pool
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
+  console.log("📩 Incoming handler registration:", req.body);
+
   const { name, email, phone, experience, specialization, location, gps } = req.body;
 
-  // Basic validation
   if (!name || !email || !phone) {
+    console.error("❌ Missing required fields");
     return res.status(400).json({ success: false, message: "name, email and phone are required" });
   }
 
@@ -20,21 +22,22 @@ router.post("/register", async (req, res) => {
     `;
     const values = [name, email, phone, experience || null, specialization || null, location || null, gps || null];
 
+    console.log("📝 Executing query:", insertQuery, values);
+
     const result = await pool.query(insertQuery, values);
     const handler = result.rows[0];
 
+    console.log("✅ Inserted handler:", handler);
+
     return res.json({ success: true, handler });
   } catch (err) {
-    console.error("DB Error:", err);
-
-    // unique constraint on email -> Postgres error code 23505
+    console.error("🔥 DB Error:", err);
     if (err.code === "23505") {
       return res.status(409).json({
         success: false,
-        message: "A handler with this email already exists. If this is you, contact admin."
+        message: "A handler with this email already exists."
       });
     }
-
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
