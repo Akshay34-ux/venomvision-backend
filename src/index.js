@@ -10,6 +10,8 @@ import reportBiteRoute from "./routes/reportBite.js";
 import adminRoute from "./routes/admin.js";
 import handlerRoute from "./routes/handlers.js";
 import adminHandlersRoute from "./routes/adminHandlers.js";
+import reportsRoute from "./routes/reports.js";
+import handlerAuthRoute from "./routes/handlerAuth.js";
 
 // Resolve __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +41,8 @@ app.use("/api/report-bite", reportBiteRoute);
 app.use("/api/handlers", handlerRoute);          // handler register
 app.use("/api/admin", adminRoute);               // admin login
 app.use("/api/admin/handlers", adminHandlersRoute); // admin approves handlers
+app.use("/api/reports", reportsRoute);
+app.use("/api/handlers/auth", handlerAuthRoute);
 
 // Root check
 app.get("/", (req, res) => {

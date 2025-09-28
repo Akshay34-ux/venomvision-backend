@@ -41,5 +41,26 @@ router.post("/register", async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
+// Get all handlers
+router.get("/list", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM handlers ORDER BY created_at DESC");
+    res.json({ success: true, handlers: result.rows });
+  } catch (err) {
+    console.error("DB Error:", err.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+router.get("/active", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, name, email, phone, experience, specialization, location, gps, status FROM handlers WHERE status = 'approved' ORDER BY created_at DESC"
+    );
+    res.json({ success: true, handlers: result.rows });
+  } catch (err) {
+    console.error("DB Error:", err.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
 
 export default router;
