@@ -3,12 +3,21 @@ import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587", 10),
-  secure: process.env.SMTP_SECURE === "true", // true for 465
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: process.env.SMTP_SECURE === "true", // false for 587
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+});
+
+// Simple check if Gmail connection works
+transporter.verify((err, success) => {
+  if (err) {
+    console.error("❌ Gmail transporter error:", err.message);
+  } else {
+    console.log("✅ Gmail transporter ready:", success);
+  }
 });
 
 export async function sendApprovalEmail(email, resetToken) {
@@ -26,5 +35,6 @@ export async function sendApprovalEmail(email, resetToken) {
   };
 
   const info = await transporter.sendMail(mailOptions);
-  console.log(`📧 Approval email sent to ${email}, MessageId: ${info.messageId}`);
+  console.log("📧 Gmail approval email sent:", info.messageId);
+  return info;
 }

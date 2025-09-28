@@ -1,7 +1,6 @@
-// backend/src/routes/adminHandlers.js
 import express from "express";
 import pool from "../db.js";
-import { sendApprovalEmail } from "../utils/emailer.js"; // ✅ works now
+import { sendApprovalEmail } from "../utils/emailer.js";
 import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
@@ -16,8 +15,12 @@ router.put("/:id/approve", async (req, res) => {
     }
 
     const handler = check.rows[0];
+
     if (handler.status === "approved") {
       return res.status(400).json({ success: false, message: "Handler is already approved" });
+    }
+    if (handler.status === "rejected") {
+      return res.status(400).json({ success: false, message: "Handler has already been rejected" });
     }
 
     const resetToken = uuidv4();
@@ -38,7 +41,12 @@ router.put("/:id/approve", async (req, res) => {
     try {
       await sendApprovalEmail(updatedHandler.email, updatedHandler.reset_token);
     } catch (emailErr) {
-      console.error("📧 Email error:", emailErr.message);
+      console.error("📧 Gmail error:", emailErr.message);
+      return res.json({
+        success: true,
+        message: "Handler approved, but email failed",
+        handler: updatedHandler,
+      });
     }
 
     return res.json({
