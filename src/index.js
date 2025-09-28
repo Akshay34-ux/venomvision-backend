@@ -12,6 +12,7 @@ import handlerRoute from "./routes/handlers.js";
 import adminHandlersRoute from "./routes/adminHandlers.js";
 import reportsRoute from "./routes/reports.js";
 import handlerAuthRoute from "./routes/handlerAuth.js";
+import testMailRoute from "./routes/testMail.js";
 
 // Resolve __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +44,7 @@ app.use("/api/admin", adminRoute);               // admin login
 app.use("/api/admin/handlers", adminHandlersRoute); // admin approves handlers
 app.use("/api/reports", reportsRoute);
 app.use("/api/handlers/auth", handlerAuthRoute);
+app.use("/api/test-mail", testMailRoute);
 
 // Root check
 app.get("/", (req, res) => {
