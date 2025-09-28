@@ -2,7 +2,7 @@
 import express from "express";
 import pool from "../db.js";
 import { sendApprovalEmail } from "../utils/emailer.js";
-import { v4 as uuidv4 } from "uuid"; // generate reset tokens
+import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
@@ -19,7 +19,7 @@ router.put("/:id/approve", async (req, res) => {
 
     const handler = check.rows[0];
 
-    // 2. Prevent re-approval
+    // 2. Prevent re-approval/rejection
     if (handler.status === "approved") {
       return res.status(400).json({ success: false, message: "Handler is already approved" });
     }
@@ -44,18 +44,18 @@ router.put("/:id/approve", async (req, res) => {
 
     const updatedHandler = result.rows[0];
 
-    // 5. Send approval email
-    try {
-      await sendApprovalEmail(updatedHandler.email, updatedHandler.reset_token);
-    } catch (emailErr) {
-      console.error("📧 Email error:", emailErr.message);
-    }
-
-    return res.json({
+    // 5. ✅ Respond immediately
+    res.json({
       success: true,
-      message: "Handler approved and email sent",
+      message: "Handler approved, email will be sent",
       handler: updatedHandler,
     });
+
+    // 6. 📧 Send email in background (non-blocking)
+    sendApprovalEmail(updatedHandler.email, updatedHandler.reset_token)
+      .then(() => console.log(`📧 Approval email sent to ${updatedHandler.email}`))
+      .catch((emailErr) => console.error("📧 Email error:", emailErr.message));
+
   } catch (err) {
     console.error("DB Error:", err.message);
     return res.status(500).json({ success: false, message: "Server error" });
