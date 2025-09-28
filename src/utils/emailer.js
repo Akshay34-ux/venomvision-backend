@@ -3,23 +3,28 @@ import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: process.env.SMTP_SECURE === "true", // true for 465, false for 587
+  port: process.env.SMTP_PORT,
+  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
 });
 
-// simple sendEmail helper
-export async function sendEmail({ to, subject, html, text }) {
-  const from = process.env.EMAIL_FROM || process.env.SMTP_USER;
-  const info = await transporter.sendMail({
-    from,
-    to,
-    subject,
-    text: text || undefined,
-    html: html || undefined,
-  });
-  return info;
+export async function sendApprovalEmail(email, handlerId) {
+  const resetLink = `${process.env.FRONTEND_URL}/set-password/${handlerId}`;
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: email,
+    subject: "✅ VenomVision - Account Approved",
+    html: `
+      <h2>Welcome to VenomVision!</h2>
+      <p>Your handler account has been approved.</p>
+      <p>Please set your password here: <a href="${resetLink}">${resetLink}</a></p>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log(`📧 Approval email sent to ${email}`);
 }
