@@ -2,6 +2,7 @@
 import express from "express";
 import pool from "../db.js";
 import { sendApprovalEmail } from "../utils/emailer.js";
+import { v4 as uuidv4 } from "uuid"; // generate reset tokens
 
 const router = express.Router();
 
@@ -10,9 +11,19 @@ router.put("/:id/approve", async (req, res) => {
   const { id } = req.params;
 
   try {
+    // 1. Generate reset token (valid for 24 hours)
+    const resetToken = uuidv4();
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // 2. Update handler in DB
     const result = await pool.query(
-      "UPDATE handlers SET status = 'approved' WHERE id = $1 RETURNING *",
-      [id]
+      `UPDATE handlers
+       SET status = 'approved',
+           reset_token = $2,
+           reset_token_expires = $3
+       WHERE id = $1
+       RETURNING *`,
+      [id, resetToken, expires]
     );
 
     if (result.rows.length === 0) {
@@ -21,12 +32,14 @@ router.put("/:id/approve", async (req, res) => {
 
     const handler = result.rows[0];
 
+    // 3. Send email
     try {
-      await sendApprovalEmail(handler.email, handler.id);
+      await sendApprovalEmail(handler.email, handler.reset_token);
     } catch (emailErr) {
       console.error("📧 Email error:", emailErr.message);
     }
 
+    // 4. Respond
     return res.json({
       success: true,
       message: "Handler approved and email sent",
