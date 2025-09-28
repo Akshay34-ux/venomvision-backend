@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
+  port: parseInt(process.env.SMTP_PORT || "587", 10),
   secure: process.env.SMTP_SECURE === "true", // true for 465
   auth: {
     user: process.env.SMTP_USER,
@@ -11,8 +11,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendApprovalEmail(email, handlerId) {
-  const resetLink = `${process.env.FRONTEND_URL}/set-password/${handlerId}`;
+export async function sendApprovalEmail(email, resetToken) {
+  const resetLink = `${process.env.FRONTEND_URL}/set-password/${resetToken}`;
 
   const mailOptions = {
     from: process.env.EMAIL_FROM,
@@ -25,6 +25,6 @@ export async function sendApprovalEmail(email, handlerId) {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
-  console.log(`📧 Approval email sent to ${email}`);
+  const info = await transporter.sendMail(mailOptions);
+  console.log(`📧 Approval email sent to ${email}, MessageId: ${info.messageId}`);
 }
