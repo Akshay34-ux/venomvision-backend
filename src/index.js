@@ -31,26 +31,41 @@ console.log("Loaded ENV:", {
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Middleware
-app.use(cors());
+// ✅ CORS setup — allow specific domains (Vercel + local)
+app.use(
+  cors({
+    origin: [
+      "https://venomvision-admin-panel-git-main-akshays-projects-538eede4.vercel.app", // your Vercel admin panel
+      "https://venomvision-admin-panel.vercel.app", // optional, if you later rename it
+      "https://venomvision-frontend.vercel.app", // if frontend might hit backend too
+      "http://localhost:5173", // local dev frontend
+      "http://localhost:3000", // local react alternative
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// Routes
+// ✅ Routes
 app.use("/api/identify", uploadRoute);
 app.use("/api/report-bite", reportBiteRoute);
-app.use("/api/handlers", handlerRoute);          // handler register
-app.use("/api/admin", adminRoute);               // admin login
-app.use("/api/admin/handlers", adminHandlersRoute); // admin approves handlers
+app.use("/api/handlers", handlerRoute);
+app.use("/api/admin", adminRoute);
+app.use("/api/admin/handlers", adminHandlersRoute);
 app.use("/api/reports", reportsRoute);
 app.use("/api/handlers/auth", handlerAuthRoute);
 app.use("/api/test-mail", testMailRoute);
 
-// Root check
+// ✅ Root test
 app.get("/", (req, res) => {
   res.send("🚀 VenomVision Backend is running...");
 });
 
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on http://localhost:${PORT}`);
 });
